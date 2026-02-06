@@ -209,7 +209,7 @@ def aggregate_all_votes(vote_ids: list) -> tuple[pd.DataFrame, pd.DataFrame, pd.
 
 
 def main():
-    cache_file = "all_votes_raw.csv"
+    cache_file = "data/all_votes_raw.csv"
 
     # Check if cached data exists
     if os.path.exists(cache_file):
@@ -222,8 +222,8 @@ def main():
     else:
         # Fetch all available vote IDs from the API
         vote_index = fetch_all_vote_ids()
-        vote_index.to_csv("vote_index.csv", index=False)
-        print("Saved: vote_index.csv")
+        vote_index.to_csv("data/vote_index.csv", index=False)
+        print("Saved: data/vote_index.csv")
 
         vote_ids = vote_index["id"].tolist()
         df_all, party_stats, mep_stats = aggregate_all_votes(vote_ids)
@@ -252,10 +252,11 @@ def main():
                         "n_votes", "avg_rebel_score", "z_score"]].to_string(index=False))
 
     # === SAVE TO CSV ===
-    df_all.to_csv("all_votes_raw.csv", index=False)
-    party_stats.to_csv("party_stats.csv")
-    mep_stats.to_csv("mep_stats.csv", index=False)
-    print("\nSaved: all_votes_raw.csv, party_stats.csv, mep_stats.csv")
+    os.makedirs("data", exist_ok=True)
+    df_all.to_csv("data/all_votes_raw.csv", index=False)
+    party_stats.to_csv("data/party_stats.csv")
+    mep_stats.to_csv("data/mep_stats.csv", index=False)
+    print("\nSaved: data/all_votes_raw.csv, data/party_stats.csv, data/mep_stats.csv")
 
 
 if __name__ == "__main__":
