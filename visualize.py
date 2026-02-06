@@ -174,6 +174,42 @@ def plot_z_score_distribution(mep_stats):
     print(f"Saved: {OUTPUT_DIR}/z_score_distribution.png")
 
 
+def plot_party_rebel_distributions(mep_stats):
+    """Faceted histograms showing rebel score distribution for each party."""
+    parties = mep_stats["party"].unique()
+    n_parties = len(parties)
+    cols = 3
+    rows = (n_parties + cols - 1) // cols
+
+    fig, axes = plt.subplots(rows, cols, figsize=(14, 3 * rows))
+    axes = axes.flatten()
+
+    # Sort parties by median rebel score
+    party_order = mep_stats.groupby("party")["avg_rebel_score"].median().sort_values(ascending=False).index
+
+    for i, party in enumerate(party_order):
+        ax = axes[i]
+        subset = mep_stats[mep_stats["party"] == party]["avg_rebel_score"]
+        color = PARTY_COLORS.get(party, "#999999")
+
+        ax.hist(subset, bins=30, color=color, edgecolor="black", alpha=0.7)
+        ax.axvline(subset.median(), color="black", linestyle="--", linewidth=1.5, label=f"median: {subset.median():.3f}")
+        ax.set_title(f"{party} (n={len(subset)})")
+        ax.set_xlabel("Rebel Score")
+        ax.set_ylabel("Count")
+        ax.legend(fontsize=8)
+
+    # Hide empty subplots
+    for i in range(len(party_order), len(axes)):
+        axes[i].set_visible(False)
+
+    plt.suptitle("Rebel Score Distributions by Party", fontsize=14, y=1.02)
+    plt.tight_layout()
+    plt.savefig(f"{OUTPUT_DIR}/party_rebel_distributions.png", dpi=150, bbox_inches="tight")
+    plt.close()
+    print(f"Saved: {OUTPUT_DIR}/party_rebel_distributions.png")
+
+
 def main():
     import os
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -189,6 +225,7 @@ def main():
     plot_participation_vs_rebellion(mep_stats)
     plot_outliers_by_party(mep_stats)
     plot_z_score_distribution(mep_stats)
+    plot_party_rebel_distributions(mep_stats)
 
     print(f"\nAll plots saved to {OUTPUT_DIR}/")
 
