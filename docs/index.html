@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEP Voting Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        header {
+            background: #1a1a2e;
+            color: white;
+            padding: 1.5rem 2rem;
+        }
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 500;
+        }
+        header p {
+            opacity: 0.7;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        .controls {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        .controls label {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .topic-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .topic-btn {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .topic-btn:hover {
+            border-color: #1a1a2e;
+        }
+        .topic-btn.active {
+            background: #1a1a2e;
+            color: white;
+            border-color: #1a1a2e;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        #scatter-plot {
+            width: 100%;
+            height: 600px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-card h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            opacity: 0.6;
+            margin-bottom: 0.25rem;
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MEP Voting Analysis</h1>
+        <p>Rebel scores by party and topic in the European Parliament</p>
+    </header>
+
+    <div class="container">
+        <div class="controls">
+            <label>Filter by topic:</label>
+            <div class="topic-filters" id="topic-filters">
+                <button class="topic-btn active" data-topic="all">All Topics</button>
+                <!-- Topics will be populated by JS -->
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div id="scatter-plot">
+                <div class="loading">Loading data...</div>
+            </div>
+        </div>
+
+        <div class="stats" id="stats">
+            <!-- Stats will be populated by JS -->
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
