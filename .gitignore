@@ -2,3 +2,4 @@ venv/
 __pycache__/
 maxpieter.github.io
 plots/
+data/all_votes_raw.csv
