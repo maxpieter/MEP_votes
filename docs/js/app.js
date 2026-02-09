@@ -85,7 +85,15 @@ function renderChart() {
             name: party,
             x: partyData.map(() => party),
             y: partyData.map(d => d.avg_rebel_score),
-            text: partyData.map(d => `${d.first_name} ${d.last_name}<br>Country: ${d.country}<br>Votes: ${d.n_votes}<br>Rebel Score: ${d.avg_rebel_score.toFixed(4)}`),
+            customdata: partyData.map(d => d['member.id']),
+            text: partyData.map(d =>
+                `<b>${d.first_name} ${d.last_name}</b><br>` +
+                `Country: ${d.country}<br>` +
+                `Votes: ${d.n_votes}<br>` +
+                `Rebel Score: ${d.avg_rebel_score.toFixed(4)}<br>` +
+                `Z-Score: ${d.z_score.toFixed(2)}<br>` +
+                `<i>Click for profile</i>`
+            ),
             mode: 'markers',
             type: 'scatter',
             marker: {
@@ -94,6 +102,11 @@ function renderChart() {
                 opacity: 0.7,
             },
             hoverinfo: 'text',
+            hoverlabel: {
+                bgcolor: 'white',
+                bordercolor: PARTY_COLORS[party] || '#666',
+                font: { size: 12 }
+            },
         };
     });
 
@@ -124,6 +137,12 @@ function renderChart() {
     };
 
     Plotly.newPlot('scatter-plot', traces, layout, config);
+
+    // Click handler - open MEP profile
+    document.getElementById('scatter-plot').on('plotly_click', function(data) {
+        const memberId = data.points[0].customdata;
+        window.open(`https://parl8.eu/app/meps/${memberId}`, '_blank');
+    });
 }
 
 function renderStats() {
