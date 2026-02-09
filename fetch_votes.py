@@ -40,5 +40,5 @@ while True:
     PAGE += 1
 
 df = pd.DataFrame(ALL_VOTES)
-df.to_csv("data/vote_index.csv", index=False)
+df.to_csv("data/vote_index.csv", index=False, encoding="utf-8")
 print(f"Saved {len(df)} votes to data/vote_index.csv")

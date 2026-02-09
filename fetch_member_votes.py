@@ -14,9 +14,11 @@ def fetch_vote_mep(vote_id: str) -> pd.DataFrame:
 
     response = requests.get(url)
     response.raise_for_status()
+    response.encoding = "utf-8"
 
     df = pd.read_csv(
         StringIO(response.text),
+        encoding="utf-8",
         usecols=[
             "position",
             "member.id",
@@ -77,5 +79,5 @@ def fetch_all_member_votes(max_workers: int = 40) -> pd.DataFrame:
 if __name__ == "__main__":
     print("Fetching member votes for all votes in vote_index.csv...")
     df = fetch_all_member_votes()
-    df.to_csv("data/member_votes.csv", index=False)
+    df.to_csv("data/member_votes.csv", index=False, encoding="utf-8")
     print(f"Saved {len(df)} records to data/member_votes.csv")
