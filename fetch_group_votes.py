@@ -31,14 +31,6 @@ def fetch_vote_groups(vote_id: str) -> pd.DataFrame:
         ],
     )
 
-    # Determine if the group voted FOR (majority): 1=FOR, 0=AGAINST
-    df["group_voted"] = (df["count_for"] > df["count_against"]).astype(int)
-
-    # Calculate division score: 0 = unanimous, higher = more divided
-    total = df["count_for"] + df["count_against"] + df["count_abstentions"]
-    majority = df[["count_for", "count_against"]].max(axis=1)
-    df["division"] = 1 - (majority / total)
-
     return df
 
 
