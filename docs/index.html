@@ -1,145 +1,679 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MEP Voting Analysis</title>
-    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
-        header {
-            background: #1a1a2e;
-            color: white;
-            padding: 1.5rem 2rem;
-        }
-        header h1 {
-            font-size: 1.5rem;
-            font-weight: 500;
-        }
-        header p {
-            opacity: 0.7;
-            font-size: 0.9rem;
-            margin-top: 0.25rem;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-        .controls {
-            background: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1rem;
-            align-items: center;
-        }
-        .controls label {
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-        .topic-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .topic-btn {
-            padding: 0.4rem 0.8rem;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .topic-btn:hover {
-            border-color: #1a1a2e;
-        }
-        .topic-btn.active {
-            background: #1a1a2e;
-            color: white;
-            border-color: #1a1a2e;
-        }
-        .chart-container {
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        #scatter-plot {
-            width: 100%;
-            height: 600px;
-        }
-        #scatter-plot .scatterlayer .point {
-            cursor: pointer;
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .stat-card {
-            background: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-        .stat-card h3 {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            opacity: 0.6;
-            margin-bottom: 0.25rem;
-        }
-        .stat-card .value {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>MEP Voting Analysis</h1>
-        <p>Rebel scores by party and topic in the European Parliament</p>
-    </header>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>MEP Voting Analysis</title>
+        <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family:
+                    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+                    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                background: rgb(250, 250, 255);
+                color: #1e293b;
+                min-height: 100vh;
+            }
+            header {
+                background: linear-gradient(
+                    to right,
+                    white,
+                    rgba(239, 246, 255, 0.3),
+                    white
+                );
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                height: 64px;
+                padding: 0 1rem;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                border-bottom: 1px solid rgba(191, 219, 254, 0.4);
+            }
+            .header-logo {
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+            }
+            .header-logo h1 {
+                font-size: 1.25rem;
+                font-weight: 900;
+                color: #1f2937;
+            }
+            .header-logo h1 span {
+                color: rgb(68, 125, 252);
+            }
+            .header-nav {
+                display: flex;
+                align-items: center;
+                background: rgba(219, 234, 254, 0.5);
+                border-radius: 0.5rem;
+                padding: 0.25rem;
+                backdrop-filter: blur(4px);
+                border: 1px solid rgba(191, 219, 254, 0.3);
+            }
+            .header-nav a {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #374151;
+                text-decoration: none;
+                border-radius: 0.375rem;
+                transition: all 0.3s ease;
+            }
+            .header-nav a:hover {
+                color: rgb(68, 125, 252);
+                background: rgba(255, 255, 255, 0.9);
+                transform: scale(1.05);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            }
+            .header-nav a.active {
+                color: rgb(68, 125, 252);
+                background: rgba(255, 255, 255, 0.9);
+                border-bottom: 2px solid rgb(68, 125, 252);
+            }
+            .header-nav a svg {
+                width: 1rem;
+                height: 1rem;
+            }
+            .header-actions {
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            .header-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 36px;
+                height: 36px;
+                background: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(4px);
+                border-radius: 0.5rem;
+                border: 1px solid rgba(191, 219, 254, 0.4);
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+                cursor: pointer;
+                transition: all 0.3s ease;
+                color: #4b5563;
+            }
+            .header-btn:hover {
+                background: rgba(239, 246, 255, 0.9);
+                border-color: rgba(147, 197, 253, 0.5);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                transform: scale(1.05);
+                color: rgb(68, 125, 252);
+            }
+            .header-btn svg {
+                width: 1.25rem;
+                height: 1.25rem;
+            }
+            @media (max-width: 768px) {
+                .header-nav {
+                    display: none;
+                }
+            }
+            .app-container {
+                display: flex;
+                padding-top: 64px;
+                min-height: 100vh;
+            }
 
-    <div class="container">
-        <div class="controls">
-            <label>Filter by topic:</label>
-            <div class="topic-filters" id="topic-filters">
-                <button class="topic-btn active" data-topic="all">All Topics</button>
-                <!-- Topics will be populated by JS -->
+            /* Sidebar */
+            .sidebar {
+                width: 280px;
+                background: white;
+                border-right: 1px solid #e2e8f0;
+                height: calc(100vh - 64px);
+                position: fixed;
+                top: 64px;
+                left: 0;
+                overflow-y: auto;
+                overflow-x: hidden;
+                transition: width 0.3s ease;
+                z-index: 50;
+                display: flex;
+                flex-direction: column;
+            }
+            .sidebar.collapsed {
+                width: 64px;
+            }
+            .sidebar-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 1rem;
+                border-bottom: 1px solid #e2e8f0;
+                background: #f9fafb;
+                flex-shrink: 0;
+            }
+            .sidebar.collapsed .sidebar-header {
+                justify-content: center;
+                padding: 1rem 0.5rem;
+            }
+            .sidebar-title {
+                font-size: 0.9rem;
+                font-weight: 700;
+                color: #1e293b;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                white-space: nowrap;
+                overflow: hidden;
+            }
+            .sidebar.collapsed .sidebar-title {
+                display: none;
+            }
+            .sidebar-title svg {
+                width: 18px;
+                height: 18px;
+                color: #64748b;
+                flex-shrink: 0;
+            }
+            .collapse-btn {
+                width: 32px;
+                height: 32px;
+                border: none;
+                border-radius: 8px;
+                background: transparent;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+                color: #64748b;
+                flex-shrink: 0;
+            }
+            .collapse-btn:hover {
+                background: #e5e7eb;
+                color: #374151;
+            }
+            .collapse-btn svg {
+                width: 20px;
+                height: 20px;
+                transition: transform 0.3s ease;
+            }
+            .sidebar.collapsed .collapse-btn svg {
+                transform: rotate(180deg);
+            }
+
+            /* Collapsed icons */
+            .collapsed-icons {
+                display: none;
+                flex-direction: column;
+                align-items: center;
+                padding: 1rem 0;
+                gap: 0.5rem;
+            }
+            .sidebar.collapsed .collapsed-icons {
+                display: flex;
+            }
+            .collapsed-icon-btn {
+                width: 44px;
+                height: 44px;
+                border: none;
+                border-radius: 8px;
+                background: transparent;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.2s ease;
+                color: #64748b;
+            }
+            .collapsed-icon-btn:hover {
+                background: #f3f4f6;
+                color: rgb(68, 125, 252);
+            }
+            .collapsed-icon-btn svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            /* Filter sections */
+            .sidebar-content {
+                flex: 1;
+                overflow-y: auto;
+            }
+            .sidebar.collapsed .sidebar-content {
+                display: none;
+            }
+            .filter-section {
+                padding: 1rem;
+                border-bottom: 1px solid #f1f5f9;
+            }
+            .filter-label {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #64748b;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                margin-bottom: 0.75rem;
+            }
+            .filter-options {
+                display: flex;
+                flex-direction: column;
+                gap: 0.375rem;
+            }
+            .filter-option {
+                padding: 0.625rem 0.875rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                background: white;
+                cursor: pointer;
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #475569;
+                transition: all 0.15s ease;
+                text-align: left;
+            }
+            .filter-option:hover {
+                border-color: rgb(68, 125, 252);
+                color: rgb(68, 125, 252);
+                background: #f8fafc;
+            }
+            .filter-option.active {
+                background: rgb(68, 125, 252);
+                color: white;
+                border-color: rgb(68, 125, 252);
+            }
+
+            /* Search input */
+            .search-container {
+                position: relative;
+                margin-bottom: 0.75rem;
+            }
+            .search-icon {
+                position: absolute;
+                left: 0.75rem;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 16px;
+                height: 16px;
+                color: #94a3b8;
+                pointer-events: none;
+            }
+            .search-input {
+                width: 100%;
+                padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                font-size: 0.8125rem;
+                font-family: inherit;
+                color: #1e293b;
+                background: #f8fafc;
+                transition: all 0.15s ease;
+            }
+            .search-input::placeholder {
+                color: #94a3b8;
+            }
+            .search-input:focus {
+                outline: none;
+                border-color: rgb(68, 125, 252);
+                background: white;
+                box-shadow: 0 0 0 3px rgba(68, 125, 252, 0.1);
+            }
+
+            /* Topic filters - scrollable list */
+            .topic-list {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+                max-height: 400px;
+                overflow-y: auto;
+            }
+            .topic-option {
+                padding: 0.5rem 0.75rem;
+                border-radius: 6px;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                font-size: 0.8125rem;
+                font-weight: 500;
+                color: #475569;
+                transition: all 0.15s ease;
+                text-align: left;
+            }
+            .topic-option:hover {
+                background: #f1f5f9;
+                color: rgb(68, 125, 252);
+            }
+            .topic-option.active {
+                background: rgba(68, 125, 252, 0.1);
+                color: rgb(68, 125, 252);
+                font-weight: 600;
+            }
+
+            /* Main content */
+            .main-content {
+                flex: 1;
+                margin-left: 280px;
+                padding: 1.5rem;
+                transition: margin-left 0.3s ease;
+            }
+            .main-content.collapsed {
+                margin-left: 64px;
+            }
+            .chart-container {
+                background: white;
+                border-radius: 1rem;
+                padding: 1.5rem;
+                box-shadow:
+                    0 1px 3px rgba(0, 0, 0, 0.08),
+                    0 1px 2px rgba(0, 0, 0, 0.06);
+                border: 1px solid #e2e8f0;
+            }
+            #scatter-plot {
+                width: 100%;
+                height: 600px;
+            }
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            .stat-card {
+                background: white;
+                padding: 1.25rem 1.5rem;
+                border-radius: 1rem;
+                box-shadow:
+                    0 1px 3px rgba(0, 0, 0, 0.08),
+                    0 1px 2px rgba(0, 0, 0, 0.06);
+                border: 1px solid #e2e8f0;
+                transition: all 0.2s ease;
+            }
+            .stat-card:hover {
+                box-shadow:
+                    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                transform: translateY(-2px);
+            }
+            .stat-card h3 {
+                font-size: 0.7rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #64748b;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+            }
+            .stat-card .value {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #1e293b;
+            }
+            .loading {
+                text-align: center;
+                padding: 4rem;
+                color: #64748b;
+                font-size: 1rem;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .sidebar {
+                    width: 64px;
+                }
+                .sidebar .sidebar-content {
+                    display: none;
+                }
+                .sidebar .sidebar-title {
+                    display: none;
+                }
+                .sidebar .collapsed-icons {
+                    display: flex;
+                }
+                .sidebar.expanded {
+                    width: 280px;
+                }
+                .sidebar.expanded .sidebar-content {
+                    display: block;
+                }
+                .sidebar.expanded .sidebar-title {
+                    display: flex;
+                }
+                .sidebar.expanded .collapsed-icons {
+                    display: none;
+                }
+                .main-content {
+                    margin-left: 64px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="header-logo">
+                <h1>MEP<span> voting</span></h1>
             </div>
-        </div>
-
-        <div class="chart-container">
-            <div id="scatter-plot">
-                <div class="loading">Loading data...</div>
+            <nav class="header-nav">
+                <a href="#" class="active">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                        ></path>
+                    </svg>
+                    <span>Rebel Scores</span>
+                </a>
+            </nav>
+            <div class="header-actions">
+                <a
+                    href="https://github.com/maxpieter/MEP_votes"
+                    target="_blank"
+                    class="header-btn"
+                    title="View on GitHub"
+                >
+                    <svg fill="currentColor" viewBox="0 0 24 24">
+                        <path
+                            fill-rule="evenodd"
+                            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                            clip-rule="evenodd"
+                        ></path>
+                    </svg>
+                </a>
             </div>
+        </header>
+
+        <div class="app-container">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <span class="sidebar-title">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"
+                            />
+                        </svg>
+                        Filters
+                    </span>
+                    <button
+                        class="collapse-btn"
+                        id="collapse-btn"
+                        title="Toggle sidebar"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M15 19l-7-7 7-7"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Collapsed state icons -->
+                <div class="collapsed-icons">
+                    <button
+                        class="collapsed-icon-btn"
+                        id="expand-filters-btn"
+                        title="Expand to show filters"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"
+                            />
+                        </svg>
+                    </button>
+                    <button
+                        class="collapsed-icon-btn"
+                        id="expand-search-btn"
+                        title="Expand to show search"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke-width="2"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Expanded state content -->
+                <div class="sidebar-content">
+                    <div class="filter-section">
+                        <div class="filter-label">Parliament Period</div>
+                        <div class="filter-options" id="period-filters">
+                            <!-- Periods will be populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <div class="filter-label">Topic</div>
+                        <div class="search-container">
+                            <svg
+                                class="search-icon"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke-width="2"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                                />
+                            </svg>
+                            <input
+                                type="text"
+                                id="topic-search"
+                                class="search-input"
+                                placeholder="Search topics..."
+                            />
+                        </div>
+                        <div class="topic-list" id="topic-filters">
+                            <button
+                                class="topic-option active"
+                                data-topic="all"
+                            >
+                                All Topics
+                            </button>
+                            <!-- Topics will be populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main content -->
+            <main class="main-content" id="main-content">
+                <div class="stats" id="stats">
+                    <!-- Stats will be populated by JS -->
+                </div>
+
+                <div class="chart-container">
+                    <div id="scatter-plot">
+                        <div class="loading">Loading data...</div>
+                    </div>
+                </div>
+            </main>
         </div>
 
-        <div class="stats" id="stats">
-            <!-- Stats will be populated by JS -->
-        </div>
-    </div>
+        <script src="js/app.js"></script>
+        <script>
+            // Sidebar toggle functionality
+            const sidebar = document.getElementById("sidebar");
+            const mainContent = document.getElementById("main-content");
+            const collapseBtn = document.getElementById("collapse-btn");
+            const expandFiltersBtn =
+                document.getElementById("expand-filters-btn");
+            const expandSearchBtn =
+                document.getElementById("expand-search-btn");
 
-    <script src="js/app.js"></script>
-</body>
+            function toggleSidebar() {
+                sidebar.classList.toggle("collapsed");
+                mainContent.classList.toggle("collapsed");
+
+                // Trigger Plotly resize after animation
+                setTimeout(() => {
+                    window.dispatchEvent(new Event("resize"));
+                }, 300);
+            }
+
+            function expandSidebar() {
+                sidebar.classList.remove("collapsed");
+                mainContent.classList.remove("collapsed");
+
+                // Trigger Plotly resize after animation
+                setTimeout(() => {
+                    window.dispatchEvent(new Event("resize"));
+                }, 300);
+            }
+
+            collapseBtn.addEventListener("click", toggleSidebar);
+            expandFiltersBtn.addEventListener("click", expandSidebar);
+            expandSearchBtn.addEventListener("click", () => {
+                expandSidebar();
+                // Focus the search input after expansion
+                setTimeout(() => {
+                    document.getElementById("topic-search").focus();
+                }, 350);
+            });
+        </script>
+    </body>
 </html>

@@ -1,0 +1,55 @@
+vote_index topic fill summary
+
+Mapping hits: 963
+Phrase-match hits: 384
+Missing topics before: 695
+Missing topics after: 135
+
+Sample filled rows (up to 15):
+Row 0: ['Common foreign and security policy (CFSP)', 'Common security and defence policy (CSDP); WEU', 'NATO'] -> Defense, Foreign affairs
+Row 2: ['Information and communication technologies', 'digital technologies'] -> Digital
+Row 3: ['European Commission'] -> Democracy
+Row 4: ['Fundamental freedoms', 'human rights', 'democracy in general', 'Human rights situation in the world'] -> Democracy, Human rights
+Row 5: ['Principles common to the Member States', 'EU values'] -> Democracy
+Row 7: ['Fundamental freedoms', 'human rights', 'democracy in general', 'Human rights situation in the world'] -> Democracy, Human rights
+Row 9: ['Fundamental freedoms', 'human rights', 'democracy in general', 'Human rights situation in the world'] -> Democracy, Human rights
+Row 10: ['Common foreign and security policy (CFSP)', 'Human rights situation in the world'] -> Foreign affairs, Human rights
+Row 11: ['Common security and defence policy (CSDP); WEU', 'NATO'] -> Defense, Foreign affairs
+Row 12: ['Common foreign and security policy (CFSP)'] -> Foreign affairs
+Row 15: ['Structural funds', 'investment funds in general', 'programmes'] -> Economy and budget
+Row 20: ["Citizen's rights", 'Elections', 'direct universal suffrage'] -> Democracy
+Row 23: ['Principles common to the Member States', 'EU values'] -> Democracy
+Row 24: ['Cybersecurity', 'cyberspace policy', 'Ethical information policy', 'Fundamental freedoms', 'human rights', 'democracy in general'] -> Democracy, Human rights
+Row 25: ['Human rights situation in the world'] -> Human rights
+
+Top 30 oeil_subjects among remaining missing rows:
+1. associations: 4
+2. Treaties in general: 4
+3. Citizen's rights: 4
+4. Action to combat violence: 3
+5. trafficking in human beings and migrant smuggling: 3
+6. Economic: 3
+7. social and territorial cohesion: 3
+8. Communications by satellite: 3
+9. Maritime safety: 3
+10. Industrial property: 3
+11. European patent: 3
+12. Community patent: 3
+13. design and pattern: 3
+14. European Council: 3
+15. European Social Fund (ESF): 2
+16. Fund for European Aid to the Most Deprived (FEAD): 2
+17. Foreign direct investment (FDI): 2
+18. President: 2
+19. members: 2
+20. mandates: 2
+21. political groups: 2
+22. Social economy: 2
+23. mutual societies: 2
+24. cooperatives: 2
+25. Social and community life: 2
+26. foundations: 2
+27. Agencies and bodies of the EU: 2
+28. Standardisation: 2
+29. EC/EU standards and trade mark: 2
+30. certification: 2
