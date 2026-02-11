@@ -9,7 +9,7 @@ def load_and_merge_data() -> pd.DataFrame:
     """Load pre-fetched CSV files and merge them on vote_id."""
     print("Loading data from CSV files...")
 
-    df_votes = pd.read_csv("data/vote_index.csv")
+    df_votes = pd.read_csv("data/vote_index_clean.csv")
     print(f"  Loaded {len(df_votes)} vote records")
 
     df_members = pd.read_csv("data/member_votes.csv")
