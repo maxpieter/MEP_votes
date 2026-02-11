@@ -10,22 +10,27 @@ import pandas as pd
 
 
 def calculate_scores(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate division and rebel scores."""
-    # Calculate group_voted: 1=FOR (majority), 0=AGAINST
-    df["group_voted"] = (df["count_for"] > df["count_against"]).astype(int)
+    """Calculate cohesion-weighted deviation (rebel) scores."""
 
-    # Calculate division score: 0 = unanimous, higher = more divided
+    # Majority position among AGAINST(0), FOR(1), ABSTAIN(2)
+    maj_col = df[["count_against", "count_for", "count_abstentions"]].idxmax(axis=1)
+    maj_map = {"count_against": 0, "count_for": 1, "count_abstentions": 2}
+    df["group_majority"] = maj_col.map(maj_map).astype(int)
+
+    # Agreement Index (AI) cohesion per (group, vote)
     total = df["count_for"] + df["count_against"] + df["count_abstentions"]
-    majority = df[["count_for", "count_against"]].max(axis=1)
-    df["division"] = 1 - (majority / total)
+    M = df[["count_for", "count_against", "count_abstentions"]].max(axis=1)
+    df["AI"] = ((M - (total - M) / 2) / total).where(total > 0, 0.0)
 
-    # Calculate rebel score (only FOR vs AGAINST counts)
-    voted_opposite = (df["member_voted"].isin([0, 1])) & (
-        df["member_voted"] != df["group_voted"]
-    )
-    df["rebel_score"] = voted_opposite.astype(int) * (1 - df["division"])
+    # Deviation indicator (ignore DID_NOT_VOTE=3)
+    participated = df["member_voted"].isin([0, 1, 2])
+    df["deviation"] = (participated & (df["member_voted"] != df["group_majority"])).astype(int)
+
+    # Weighted deviation score per vote
+    df["rebel_score"] = df["deviation"] * df["AI"]
 
     return df
+
 
 
 def compute_stats(df_all: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -39,9 +44,10 @@ def compute_stats(df_all: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     # === PARTY-LEVEL STATS ===
     party_stats = (
         df_all.groupby("code")
-        .agg({"division": "mean", "vote_id": "nunique"})
-        .rename(columns={"division": "avg_division", "vote_id": "n_votes"})
+        .agg({"AI": "mean", "vote_id": "nunique"})
+        .rename(columns={"AI": "avg_AI", "vote_id": "n_votes"})
     )
+
 
     # === MEP-LEVEL STATS ===
     mep_stats = df_all.groupby("member.id").agg(
@@ -75,7 +81,8 @@ def compute_stats(df_all: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 def filter_by_topic(df: pd.DataFrame, topic: str) -> pd.DataFrame:
     """Filter dataframe by topic (case-insensitive, partial match)."""
-    mask = df["topics"].fillna("").str.lower().str.contains(topic.lower())
+    topic_col = "topics_effective" if "topics_effective" in df.columns else "topics"
+    mask = df[topic_col].fillna("").str.lower().str.contains(topic.lower())
     return df[mask]
 
 
@@ -164,10 +171,9 @@ def main():
 
     # Save outputs
     os.makedirs("data", exist_ok=True)
-    suffix = f"_{args.topic.lower().replace(' ', '_')}" if args.topic else ""
-    party_stats.to_csv(f"data/party_stats{suffix}.csv")
-    mep_stats.to_csv(f"data/mep_stats{suffix}.csv", index=False)
-    print(f"\nSaved: data/party_stats{suffix}.csv, data/mep_stats{suffix}.csv")
+    party_stats.to_csv(f"data/party_stats.csv")
+    mep_stats.to_csv(f"data/mep_stats.csv", index=False)
+    print(f"\nSaved: data/party_stats.csv, data/mep_stats.csv")
 
 
 if __name__ == "__main__":
