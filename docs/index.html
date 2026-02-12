@@ -52,7 +52,7 @@
                 color: #1f2937;
             }
             .header-logo h1 span {
-                color: rgb(68, 125, 252);
+                color: rgb(0, 51, 153);
             }
             .header-nav {
                 display: flex;
@@ -76,15 +76,15 @@
                 transition: all 0.3s ease;
             }
             .header-nav a:hover {
-                color: rgb(68, 125, 252);
+                color: rgb(0, 51, 153);
                 background: rgba(255, 255, 255, 0.9);
                 transform: scale(1.05);
                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             }
             .header-nav a.active {
-                color: rgb(68, 125, 252);
+                color: rgb(0, 51, 153);
                 background: rgba(255, 255, 255, 0.9);
-                border-bottom: 2px solid rgb(68, 125, 252);
+                border-bottom: 2px solid rgb(0, 51, 153);
             }
             .header-nav a svg {
                 width: 1rem;
@@ -116,7 +116,7 @@
                 border-color: rgba(147, 197, 253, 0.5);
                 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
                 transform: scale(1.05);
-                color: rgb(68, 125, 252);
+                color: rgb(0, 51, 153);
             }
             .header-btn svg {
                 width: 1.25rem;
@@ -237,7 +237,7 @@
             }
             .collapsed-icon-btn:hover {
                 background: #f3f4f6;
-                color: rgb(68, 125, 252);
+                color: rgb(0, 51, 153);
             }
             .collapsed-icon-btn svg {
                 width: 20px;
@@ -282,14 +282,14 @@
                 text-align: left;
             }
             .filter-option:hover {
-                border-color: rgb(68, 125, 252);
-                color: rgb(68, 125, 252);
+                border-color: rgb(0, 51, 153);
+                color: rgb(0, 51, 153);
                 background: #f8fafc;
             }
             .filter-option.active {
-                background: rgb(68, 125, 252);
+                background: rgb(0, 51, 153);
                 color: white;
-                border-color: rgb(68, 125, 252);
+                border-color: rgb(0, 51, 153);
             }
 
             /* Search input */
@@ -323,9 +323,9 @@
             }
             .search-input:focus {
                 outline: none;
-                border-color: rgb(68, 125, 252);
+                border-color: rgb(0, 51, 153);
                 background: white;
-                box-shadow: 0 0 0 3px rgba(68, 125, 252, 0.1);
+                box-shadow: 0 0 0 3px rgba(0, 51, 153, 0.1);
             }
 
             /* Topic filters - scrollable list */
@@ -350,11 +350,11 @@
             }
             .topic-option:hover {
                 background: #f1f5f9;
-                color: rgb(68, 125, 252);
+                color: rgb(0, 51, 153);
             }
             .topic-option.active {
-                background: rgba(68, 125, 252, 0.1);
-                color: rgb(68, 125, 252);
+                background: rgba(0, 51, 153, 0.1);
+                color: rgb(0, 51, 153);
                 font-weight: 600;
             }
 
@@ -576,6 +576,14 @@
 
                 <!-- Expanded state content -->
                 <div class="sidebar-content">
+                    <div class="filter-section">
+                        <div class="filter-label">Group By</div>
+                        <div class="filter-options" id="view-mode-filters">
+                            <button class="filter-option active" data-mode="group" onclick="setViewMode('group')">Political Group</button>
+                            <button class="filter-option" data-mode="country" onclick="setViewMode('country')">Country</button>
+                        </div>
+                    </div>
+
                     <div class="filter-section">
                         <div class="filter-label">Parliament Period</div>
                         <div class="filter-options" id="period-filters">

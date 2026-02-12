@@ -59,8 +59,10 @@ def slugify(text: str) -> str:
 
 
 def calculate_scores(df: pd.DataFrame) -> pd.DataFrame:
-    """Calculate division and rebel scores."""
+    """Calculate division and rebel scores for both group and country."""
     df = df.copy()
+
+    # Group-level rebel score (existing logic)
     df["group_voted"] = (df["count_for"] > df["count_against"]).astype(int)
     total = df["count_for"] + df["count_against"] + df["count_abstentions"]
     majority = df[["count_for", "count_against"]].max(axis=1)
@@ -69,14 +71,41 @@ def calculate_scores(df: pd.DataFrame) -> pd.DataFrame:
         df["member_voted"] != df["group_voted"]
     )
     df["rebel_score"] = voted_opposite.astype(int) * (1 - df["division"])
+
+    # Country-level rebel score
+    # Aggregate votes by country for each vote
+    country_votes = df.groupby(["vote_id", "member.country.code"]).agg(
+        country_for=("member_voted", lambda x: (x == 1).sum()),
+        country_against=("member_voted", lambda x: (x == 0).sum()),
+        country_abstain=("member_voted", lambda x: (x == 2).sum()),
+    ).reset_index()
+    country_votes["country_voted"] = (country_votes["country_for"] > country_votes["country_against"]).astype(int)
+    country_total = country_votes["country_for"] + country_votes["country_against"] + country_votes["country_abstain"]
+    country_majority = country_votes[["country_for", "country_against"]].max(axis=1)
+    country_votes["country_division"] = 1 - (country_majority / country_total.replace(0, 1))
+
+    # Merge country stats back
+    df = df.merge(
+        country_votes[["vote_id", "member.country.code", "country_voted", "country_division"]],
+        on=["vote_id", "member.country.code"],
+        how="left"
+    )
+
+    # Calculate country rebel score
+    country_voted_opposite = (df["member_voted"].isin([0, 1])) & (
+        df["member_voted"] != df["country_voted"]
+    )
+    df["country_rebel_score"] = country_voted_opposite.astype(int) * (1 - df["country_division"])
+
     return df
 
 
 def compute_mep_stats(df: pd.DataFrame) -> pd.DataFrame:
-    """Compute MEP statistics with outlier detection."""
+    """Compute MEP statistics with outlier detection for both group and country."""
     mep_stats = df.groupby("member.id").agg(
         avg_rebel_score=("rebel_score", "mean"),
         total_rebel_score=("rebel_score", "sum"),
+        avg_country_rebel_score=("country_rebel_score", "mean"),
         n_votes=("member_voted", "count"),
         group=("member.group.code", "first"),
         first_name=("member.first_name", "first"),
@@ -88,13 +117,25 @@ def compute_mep_stats(df: pd.DataFrame) -> pd.DataFrame:
     group_agg = mep_stats.groupby("group")["avg_rebel_score"].agg(["mean", "std"])
     group_agg.columns = ["group_avg_rebel", "group_std"]
     mep_stats = mep_stats.merge(group_agg, on="group")
-    mep_stats["z_score"] = (
+    mep_stats["group_z_score"] = (
         (mep_stats["avg_rebel_score"] - mep_stats["group_avg_rebel"])
         / mep_stats["group_std"].replace(0, float("inf"))
     )
     mep_stats = mep_stats.drop(columns=["group_std"])
-    mep_stats["is_outlier"] = mep_stats["z_score"] > 2
-    mep_stats = mep_stats.sort_values("z_score", ascending=False)
+    mep_stats["group_is_outlier"] = mep_stats["group_z_score"] > 2
+
+    # Z-score within country
+    country_agg = mep_stats.groupby("country")["avg_country_rebel_score"].agg(["mean", "std"])
+    country_agg.columns = ["country_avg_rebel", "country_std"]
+    mep_stats = mep_stats.merge(country_agg, on="country")
+    mep_stats["country_z_score"] = (
+        (mep_stats["avg_country_rebel_score"] - mep_stats["country_avg_rebel"])
+        / mep_stats["country_std"].replace(0, float("inf"))
+    )
+    mep_stats = mep_stats.drop(columns=["country_std"])
+    mep_stats["country_is_outlier"] = mep_stats["country_z_score"] > 2
+
+    mep_stats = mep_stats.sort_values("group_z_score", ascending=False)
 
     return mep_stats
 
@@ -130,8 +171,12 @@ def export_data(df: pd.DataFrame, output_path: str) -> int:
         "avg_rebel_score",
         "total_rebel_score",
         "group_avg_rebel",
-        "z_score",
-        "is_outlier",
+        "group_z_score",
+        "group_is_outlier",
+        "avg_country_rebel_score",
+        "country_avg_rebel",
+        "country_z_score",
+        "country_is_outlier",
         "topics",
     ]
     mep_data = mep_data[output_cols]
